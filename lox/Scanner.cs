@@ -1,6 +1,5 @@
 namespace CraftingInterpreters.Lox;
 
-using System;
 using static TokenType;
 
 class Scanner
@@ -14,24 +13,26 @@ class Scanner
 
     private bool IsAtEnd => current >= source.Length;
 
-    private static readonly Dictionary<string, TokenType> Keywords = new() {
-        {"and", AND},
-        {"class",  CLASS},
-        {"else",   ELSE},
-        {"false",  FALSE},
-        {"for",    FOR},
-        {"fun",    FUN},
-        {"if",     IF},
-        {"nil",    NIL},
-        {"or",     OR},
-        {"print",  PRINT},
-        {"return", RETURN},
-        {"super",  SUPER},
-        {"this",   THIS},
-        {"true",   TRUE},
-        {"var",    VAR},
-        {"while",  WHILE},
-    };
+    private static readonly Dictionary<string, TokenType> Keywords =
+        new()
+        {
+            { "and", AND },
+            { "class", CLASS },
+            { "else", ELSE },
+            { "false", FALSE },
+            { "for", FOR },
+            { "fun", FUN },
+            { "if", IF },
+            { "nil", NIL },
+            { "or", OR },
+            { "print", PRINT },
+            { "return", RETURN },
+            { "super", SUPER },
+            { "this", THIS },
+            { "true", TRUE },
+            { "var", VAR },
+            { "while", WHILE },
+        };
 
     internal Scanner(string source)
     {
@@ -55,20 +56,40 @@ class Scanner
         char c = Advance();
         switch (c)
         {
-            case '(': AddToken(LEFT_PAREN); break;
-            case ')': AddToken(RIGHT_PAREN); break;
+            case '(':
+                AddToken(LEFT_PAREN);
+                break;
+            case ')':
+                AddToken(RIGHT_PAREN);
+                break;
 
-            case '{': AddToken(LEFT_BRACE); break;
-            case '}': AddToken(RIGHT_BRACE); break;
+            case '{':
+                AddToken(LEFT_BRACE);
+                break;
+            case '}':
+                AddToken(RIGHT_BRACE);
+                break;
 
-            case ',': AddToken(COMMA); break;
-            case '.': AddToken(DOT); break;
+            case ',':
+                AddToken(COMMA);
+                break;
+            case '.':
+                AddToken(DOT);
+                break;
 
-            case '-': AddToken(MINUS); break;
-            case '+': AddToken(PLUS); break;
+            case '-':
+                AddToken(MINUS);
+                break;
+            case '+':
+                AddToken(PLUS);
+                break;
 
-            case ';': AddToken(SEMICOLON); break;
-            case '*': AddToken(STAR); break;
+            case ';':
+                AddToken(SEMICOLON);
+                break;
+            case '*':
+                AddToken(STAR);
+                break;
 
             case '!':
                 AddToken(Match('=') ? BANG_EQUAL : BANG);
@@ -89,7 +110,8 @@ class Scanner
             case '/':
                 if (Match('/'))
                 {
-                    while (Peek() != '\n' && !IsAtEnd) Advance();
+                    while (Peek() != '\n' && !IsAtEnd)
+                        Advance();
                 }
                 else
                 {
@@ -138,8 +160,10 @@ class Scanner
 
     private bool Match(char expected)
     {
-        if (IsAtEnd) return false;
-        if (source.ElementAt(current) != expected) return false;
+        if (IsAtEnd)
+            return false;
+        if (source.ElementAt(current) != expected)
+            return false;
 
         current++;
         return true;
@@ -151,7 +175,8 @@ class Scanner
 
     private void Identifier()
     {
-        while (IsAlphaNumeric(Peek())) Advance();
+        while (IsAlphaNumeric(Peek()))
+            Advance();
 
         var text = source[start..current];
         AddToken(Keywords.TryGetValue(text, out var type) ? type : IDENTIFIER);
@@ -182,13 +207,19 @@ class Scanner
 
     private void Number()
     {
-        while (char.IsDigit(Peek())) Advance();
+        while (char.IsDigit(Peek()))
+        {
+            Advance();
+        }
 
         if (Peek() == '.' && char.IsDigit(PeekNext()))
         {
             Advance();
 
-            while (char.IsDigit(Peek())) Advance();
+            while (char.IsDigit(Peek()))
+            {
+                Advance();
+            }
         }
 
         AddToken(NUMBER, double.Parse(source[start..current]));
@@ -198,4 +229,3 @@ class Scanner
 
     private bool IsAlphaNumeric(char c) => char.IsAsciiLetterOrDigit(c) || c == '_';
 }
-
