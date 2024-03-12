@@ -142,7 +142,7 @@ class Scanner
                 }
                 else
                 {
-                    Lox.error(line, "Unexpecte character.");
+                    Lox.Error(line, "Unexpecte character.");
                 }
                 break;
         }
@@ -195,7 +195,7 @@ class Scanner
 
         if (IsAtEnd)
         {
-            Lox.error(line, "Untreminated string.");
+            Lox.Error(line, "Untreminated string.");
             return;
         }
 

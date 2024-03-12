@@ -11,12 +11,17 @@ public class GenerateAst
         }
 
         string outputDir = args[0];
-        DefineAst(outputDir, "Expr", new[]{
-            "Binary   : Expr left, Token op, Expr right",
-            "Grouping : Expr expression",
-            "Literal  : Object value",
-            "Unary    : Token op, Expr right"
-        });
+        DefineAst(
+            outputDir,
+            "Expr",
+            new[]
+            {
+                "Binary   : Expr left, Token op, Expr right",
+                "Grouping : Expr expression",
+                "Literal  : Object value",
+                "Unary    : Token op, Expr right"
+            }
+        );
     }
 
     private static void DefineAst(string outputDir, string baseName, IEnumerable<string> types)
@@ -46,7 +51,11 @@ public class GenerateAst
         output.Close();
     }
 
-    private static void DefineVisitor(StreamWriter output, string baseName, IEnumerable<string> types)
+    private static void DefineVisitor(
+        StreamWriter output,
+        string baseName,
+        IEnumerable<string> types
+    )
     {
         output.WriteLine("    internal interface IExprVisitor<R>");
         output.WriteLine("    {");
@@ -54,14 +63,21 @@ public class GenerateAst
         foreach (var type in types)
         {
             var typeName = type.Split(":")[0].Trim();
-            output.WriteLine($"        R Visit{typeName}{baseName}({typeName} {baseName.ToLower()});");
+            output.WriteLine(
+                $"        R Visit{typeName}{baseName}({typeName} {baseName.ToLower()});"
+            );
         }
 
         output.WriteLine("    }");
         output.WriteLine();
     }
 
-    private static void DefineType(StreamWriter output, string baseName, string className, string fieldList)
+    private static void DefineType(
+        StreamWriter output,
+        string baseName,
+        string className,
+        string fieldList
+    )
     {
         var fields = fieldList.Split(", ");
 
@@ -95,7 +111,6 @@ public class GenerateAst
         output.WriteLine("    }");
         output.WriteLine();
     }
-
 }
 
 static class HelperExtensions
