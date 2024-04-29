@@ -4,7 +4,9 @@ using System.Text;
 
 class Lox
 {
-    static bool hadError = false;
+    private static readonly Interpreter _interpreter = new();
+    private static bool _hadError;
+    private static bool _hadRuntimeError;
 
     public static void Main(string[] args)
     {
@@ -37,9 +39,13 @@ class Lox
     {
         byte[] bytes = File.ReadAllBytes(path);
         Run(new String(Encoding.Unicode.GetChars(bytes)));
-        if (hadError)
+        if (_hadError)
         {
             Environment.Exit(65);
+        }
+        if (_hadRuntimeError)
+        {
+            Environment.Exit(70);
         }
     }
 
@@ -50,7 +56,7 @@ class Lox
         while ((line = Console.ReadLine()) is not null)
         {
             Run(line);
-            hadError = false;
+            _hadError = false;
             Console.Write("\n> ");
         }
         Environment.Exit(64);
@@ -59,10 +65,12 @@ class Lox
     private static void Run(string source)
     {
         var scanner = new Scanner(source);
-        foreach (var token in scanner.ScanTokens())
-        {
-            Console.Write(token);
-        }
+        var tokens = scanner.ScanTokens();
+        var parser = new Parser(tokens);
+        var expression = parser.Parse();
+        if (_hadError)
+            return;
+        _interpreter.Interpret(expression);
     }
 
     internal static void Error(int line, string message)
@@ -73,6 +81,24 @@ class Lox
     private static void Report(int line, string where, string message)
     {
         Console.Error.Write($"[line {line}] Error{where}: {message}");
-        hadError = true;
+        _hadError = true;
+    }
+
+    internal static void Error(Token token, string message)
+    {
+        if (token.Type == TokenType.EOF)
+        {
+            Report(token.Line, " at end", message);
+        }
+        else
+        {
+            Report(token.Line, " at '" + token.Lexeme + "'", message);
+        }
+    }
+
+    internal static void RuntimeError(RuntimeError error)
+    {
+        Console.WriteLine(error.Message + "\n[line " + error.Token.Line + "]");
+        _hadRuntimeError = true;
     }
 }
