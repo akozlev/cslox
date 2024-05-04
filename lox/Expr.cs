@@ -4,13 +4,32 @@ internal abstract class Expr
 {
     internal interface IExprVisitor<R>
     {
-        R VisitBinaryExpr(Binary expr);
-        R VisitGroupingExpr(Grouping expr);
-        R VisitLiteralExpr(Literal expr);
-        R VisitUnaryExpr(Unary expr);
+        R Visit(Assign expr);
+        R Visit(Binary expr);
+        R Visit(Grouping expr);
+        R Visit(Literal expr);
+        R Visit(Unary expr);
+        R Visit(Variable expr);
     }
 
     internal abstract R Accept<R>(IExprVisitor<R> visitor);
+
+    internal class Assign : Expr
+    {
+        public Token Name { get; }
+        public Expr Value { get; }
+
+        internal Assign(Token name, Expr value)
+        {
+            Name = name;
+            Value = value;
+        }
+
+        internal override R Accept<R>(IExprVisitor<R> visitor)
+        {
+            return visitor.Visit(this); 
+        }
+    }
 
     internal class Binary : Expr
     {
@@ -27,7 +46,7 @@ internal abstract class Expr
 
         internal override R Accept<R>(IExprVisitor<R> visitor)
         {
-            return visitor.VisitBinaryExpr(this); 
+            return visitor.Visit(this); 
         }
     }
 
@@ -42,7 +61,7 @@ internal abstract class Expr
 
         internal override R Accept<R>(IExprVisitor<R> visitor)
         {
-            return visitor.VisitGroupingExpr(this); 
+            return visitor.Visit(this); 
         }
     }
 
@@ -57,7 +76,7 @@ internal abstract class Expr
 
         internal override R Accept<R>(IExprVisitor<R> visitor)
         {
-            return visitor.VisitLiteralExpr(this); 
+            return visitor.Visit(this); 
         }
     }
 
@@ -74,7 +93,22 @@ internal abstract class Expr
 
         internal override R Accept<R>(IExprVisitor<R> visitor)
         {
-            return visitor.VisitUnaryExpr(this); 
+            return visitor.Visit(this); 
+        }
+    }
+
+    internal class Variable : Expr
+    {
+        public Token Name { get; }
+
+        internal Variable(Token name)
+        {
+            Name = name;
+        }
+
+        internal override R Accept<R>(IExprVisitor<R> visitor)
+        {
+            return visitor.Visit(this); 
         }
     }
 

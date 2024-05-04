@@ -16,10 +16,23 @@ public class GenerateAst
             "Expr",
             new[]
             {
+                "Assign   : Token name, Expr value",
                 "Binary   : Expr left, Token op, Expr right",
                 "Grouping : Expr expression",
                 "Literal  : Object value",
-                "Unary    : Token op, Expr right"
+                "Unary    : Token op, Expr right",
+                "Variable : Token name",
+            }
+        );
+
+        DefineAst(
+            outputDir,
+            "Stmt",
+            new[]
+            {
+                "ExpressionStatment : Expr expression", // Expression Statement
+                "Print              : Expr expression",
+                "Var                : Token name, Expr initializer",
             }
         );
     }
@@ -63,9 +76,7 @@ public class GenerateAst
         foreach (var type in types)
         {
             var typeName = type.Split(":")[0].Trim();
-            output.WriteLine(
-                $"        R Visit{typeName}{baseName}({typeName} {baseName.ToLower()});"
-            );
+            output.WriteLine($"        R Visit({typeName} {baseName.ToLower()});");
         }
 
         output.WriteLine("    }");
@@ -105,7 +116,7 @@ public class GenerateAst
 
         output.WriteLine("        internal override R Accept<R>(IExprVisitor<R> visitor)");
         output.WriteLine("        {");
-        output.WriteLine($"            return visitor.Visit{className}{baseName}(this); ");
+        output.WriteLine($"            return visitor.Visit(this); ");
         output.WriteLine("        }");
 
         output.WriteLine("    }");

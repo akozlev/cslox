@@ -38,7 +38,7 @@ class Lox
     private static void RunFile(string path)
     {
         byte[] bytes = File.ReadAllBytes(path);
-        Run(new String(Encoding.Unicode.GetChars(bytes)));
+        Run(new String(Encoding.UTF8.GetChars(bytes)));
         if (_hadError)
         {
             Environment.Exit(65);
@@ -67,10 +67,10 @@ class Lox
         var scanner = new Scanner(source);
         var tokens = scanner.ScanTokens();
         var parser = new Parser(tokens);
-        var expression = parser.Parse();
+        var statements = parser.Parse();
         if (_hadError)
             return;
-        _interpreter.Interpret(expression);
+        _interpreter.Interpret(statements);
     }
 
     internal static void Error(int line, string message)
@@ -80,7 +80,7 @@ class Lox
 
     private static void Report(int line, string where, string message)
     {
-        Console.Error.Write($"[line {line}] Error{where}: {message}");
+        Console.Error.WriteLine($"[line {line}] Error{where}: {message}");
         _hadError = true;
     }
 

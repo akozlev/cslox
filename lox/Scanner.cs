@@ -142,7 +142,7 @@ class Scanner
                 }
                 else
                 {
-                    Lox.Error(line, "Unexpecte character.");
+                    Lox.Error(line, "Unexpected character: " + c);
                 }
                 break;
         }

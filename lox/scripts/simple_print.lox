@@ -1,0 +1,7 @@
+var hello;
+print hello;
+print 6;
+var hello = 5;
+print hello = 3;
+hello = 4;
+print hello;

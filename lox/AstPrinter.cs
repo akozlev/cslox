@@ -9,25 +9,36 @@ class AstPrinter : Expr.IExprVisitor<String>
         return expr.Accept(this);
     }
 
-    public string VisitBinaryExpr(Expr.Binary expr)
+    public string Visit(Expr.Binary expr)
     {
         return Parenthesize(expr.Op.Lexeme, expr.Left, expr.Right);
     }
 
-    public string VisitGroupingExpr(Expr.Grouping expr)
+    public string Visit(Expr.Grouping expr)
     {
         return Parenthesize("group", expr.Expression);
     }
 
-    public string VisitLiteralExpr(Expr.Literal expr)
+    public string Visit(Expr.Literal expr)
     {
-        if (expr.Value is null) return "nil";
+        if (expr.Value is null)
+            return "nil";
         return expr.Value.ToString();
     }
 
-    public string VisitUnaryExpr(Expr.Unary expr)
+    public string Visit(Expr.Unary expr)
     {
         return Parenthesize(expr.Op.Lexeme, expr.Right);
+    }
+
+    public string Visit(Expr.Variable expr)
+    {
+        throw new NotImplementedException();
+    }
+
+    public string Visit(Expr.Assign expr)
+    {
+        throw new NotImplementedException();
     }
 
     private String Parenthesize(String name, params Expr[] exprs)

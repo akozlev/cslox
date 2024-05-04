@@ -15,28 +15,101 @@ class Parser
         _tokens = tokens.ToList();
     }
 
-    public Expr Parse()
+    public List<Stmt> Parse()
+    {
+        var statements = new List<Stmt>();
+        while (!IsAtEnd())
+        {
+            statements.Add(Declaration());
+        }
+
+        return statements;
+    }
+
+    private Stmt Declaration()
     {
         try
         {
-            return Expression();
+            if (Match(VAR))
+                return VarDeclaration();
+            return Statement();
         }
-        catch (ParserError error)
+        catch
         {
+            Synchronize();
             return null;
         }
     }
 
+    private Stmt VarDeclaration()
+    {
+        Token name = Consume(IDENTIFIER, "Expected variable name.");
+
+        Expr intializer = null;
+
+        if (Match(EQUAL))
+        {
+            intializer = Expression();
+        }
+
+        Consume(SEMICOLON, "Expect ';' after variable declaration.");
+
+        return new Stmt.Var(name, intializer);
+    }
+
+    private Stmt Statement()
+    {
+        if (Match(PRINT))
+        {
+            return PrintStatemnt();
+        }
+        return ExpressionStatemnt();
+    }
+
+    private Stmt ExpressionStatemnt()
+    {
+        Expr value = Expression();
+        Consume(SEMICOLON, "Expect ';' after value.");
+        return new Stmt.ExpressionStatment(value);
+    }
+
+    private Stmt PrintStatemnt()
+    {
+        Expr value = Expression();
+        Consume(SEMICOLON, "Expect ';' after value.");
+        return new Stmt.Print(value);
+    }
+
     private Expr Expression()
     {
-        return Equality();
+        return Assignment();
+    }
+
+    private Expr Assignment()
+    {
+        Expr expr = Equality();
+
+        if (Match(EQUAL))
+        {
+            Token equals = Previous();
+            Expr value = Assignment();
+
+            if (expr is Expr.Variable { Name: var name })
+            {
+                return new Expr.Assign(name, value);
+            }
+
+            Error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
     }
 
     private Expr Equality()
     {
         Expr expr = Comparison();
 
-        while (Match(BANG_EQUAL, EQUAL))
+        while (Match(BANG_EQUAL, EQUAL_EQUAL))
         {
             Token op = Previous();
             Expr right = Comparison();
@@ -103,15 +176,26 @@ class Parser
     private Expr Primary()
     {
         if (Match(FALSE))
+        {
             return new Expr.Literal(false);
+        }
         if (Match(TRUE))
+        {
             return new Expr.Literal(true);
+        }
         if (Match(NIL))
+        {
             return new Expr.Literal(null);
+        }
 
         if (Match(NUMBER, STRING))
         {
             return new Expr.Literal(Previous().Literal);
+        }
+
+        if (Match(IDENTIFIER))
+        {
+            return new Expr.Variable(Previous());
         }
 
         if (Match(LEFT_PAREN))
@@ -127,7 +211,9 @@ class Parser
     private Token Consume(TokenType type, string message)
     {
         if (Check(type))
+        {
             return Advance();
+        }
 
         throw Error(Peek(), message);
     }
@@ -144,7 +230,9 @@ class Parser
         while (!IsAtEnd())
         {
             if (Previous().Type == SEMICOLON)
+            {
                 return;
+            }
 
             switch (Peek().Type)
             {
@@ -180,14 +268,18 @@ class Parser
     private bool Check(TokenType type)
     {
         if (IsAtEnd())
+        {
             return false;
+        }
         return Peek().Type == type;
     }
 
     private Token Advance()
     {
         if (!IsAtEnd())
+        {
             current++;
+        }
         return Previous();
     }
 

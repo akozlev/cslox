@@ -2,14 +2,18 @@ namespace CraftingInterpreters.Lox;
 
 using static TokenType;
 
-class Interpreter : Expr.IExprVisitor<object>
+class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
 {
-    public void Interpret(Expr expression)
+    private Env _environment = new();
+
+    public void Interpret(List<Stmt> statements)
     {
         try
         {
-            var value = Evaluate(expression);
-            Console.WriteLine(Stringify(value));
+            foreach (var statement in statements)
+            {
+                Execute(statement);
+            }
         }
         catch (RuntimeError error)
         {
@@ -17,7 +21,12 @@ class Interpreter : Expr.IExprVisitor<object>
         }
     }
 
-    public object VisitBinaryExpr(Expr.Binary expr)
+    private void Execute(Stmt statement)
+    {
+        statement.Accept(this);
+    }
+
+    public object Visit(Expr.Binary expr)
     {
         var left = Evaluate(expr.Left);
         var right = Evaluate(expr.Right);
@@ -92,17 +101,17 @@ class Interpreter : Expr.IExprVisitor<object>
         return obj.ToString();
     }
 
-    public object VisitGroupingExpr(Expr.Grouping expr)
+    public object Visit(Expr.Grouping expr)
     {
         return Evaluate(expr.Expression);
     }
 
-    public object VisitLiteralExpr(Expr.Literal expr)
+    public object Visit(Expr.Literal expr)
     {
         return expr.Value;
     }
 
-    public object VisitUnaryExpr(Expr.Unary expr)
+    public object Visit(Expr.Unary expr)
     {
         var right = Evaluate(expr.Right);
 
@@ -117,6 +126,18 @@ class Interpreter : Expr.IExprVisitor<object>
 
         // Unreachable
         return null;
+    }
+
+    public object Visit(Expr.Variable expr)
+    {
+        return _environment.Get(expr.Name);
+    }
+
+    public object Visit(Expr.Assign expr)
+    {
+        var value = Evaluate(expr.Value);
+        _environment.Assign(expr.Name, value);
+        return value;
     }
 
     private void CheckNumberOperands(Token op, object left, object right)
@@ -155,5 +176,30 @@ class Interpreter : Expr.IExprVisitor<object>
         }
 
         return true;
+    }
+
+    public object Visit(Stmt.ExpressionStatment stmt)
+    {
+        Evaluate(stmt.Expression);
+        return null;
+    }
+
+    public object Visit(Stmt.Print stmt)
+    {
+        var value = Evaluate(stmt.Expression);
+        Console.WriteLine(Stringify(value));
+        return null;
+    }
+
+    public object Visit(Stmt.Var stmt)
+    {
+        object value = null;
+        if (stmt.Initializer is not null)
+        {
+            value = Evaluate(stmt.Initializer);
+        }
+
+        _environment.Define(stmt.Name.Lexeme, value);
+        return null;
     }
 }

@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "coreclr",
+      "request": "launch",
+      "name": "Test Lox script",
+      "program": "${workspaceFolder}/bin/Debug/net7.0/lox.dll",
+      "args": [
+        "${workspaceFolder}/scripts/simple_print.lox"
+      ]
+    }
+  ]
+}
