@@ -2,12 +2,17 @@ namespace CraftingInterpreters.Lox;
 
 class Env
 {
-    public readonly Env Enclosing;
+    private readonly Env _enclosing;
     private readonly Dictionary<string, object> _values = new();
 
-    Env()
+    internal Env()
     {
-        Enclosing = null;
+        _enclosing = null;
+    }
+
+    internal Env(Env enclosing)
+    {
+        _enclosing = enclosing;
     }
 
     internal void Define(string name, object value)
@@ -17,9 +22,15 @@ class Env
 
     internal object Get(Token name)
     {
-        if (_values.TryGetValue(name.Lexeme, out var value))
+        object value;
+        if (_values.TryGetValue(name.Lexeme, out value))
         {
             return value;
+        }
+
+        if (_enclosing is not null)
+        {
+            return _enclosing.Get(name);
         }
 
         throw new RuntimeError(name, $"Undefined variable {name.Lexeme}.");
@@ -30,6 +41,12 @@ class Env
         if (_values.ContainsKey(name.Lexeme))
         {
             _values[name.Lexeme] = value;
+            return;
+        }
+
+        if (_enclosing is not null)
+        {
+            _enclosing.Assign(name, value);
             return;
         }
 

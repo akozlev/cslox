@@ -1,5 +1,7 @@
 namespace CraftingInterpreters.Lox;
 
+using System;
+using System.Collections.Generic;
 using static TokenType;
 
 class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
@@ -201,5 +203,28 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
 
         _environment.Define(stmt.Name.Lexeme, value);
         return null;
+    }
+
+    public object Visit(Stmt.Block stmt)
+    {
+        ExecuteBlock(stmt.Statements, new Env(_environment));
+        return null;
+    }
+
+    private void ExecuteBlock(IList<Stmt> statements, Env environment)
+    {
+        var previous = _environment;
+        try
+        {
+            _environment = environment;
+            foreach (var statement in statements)
+            {
+                Execute(statement);
+            }
+        }
+        finally
+        {
+            _environment = previous;
+        }
     }
 }

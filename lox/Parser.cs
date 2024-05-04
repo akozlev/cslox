@@ -63,7 +63,26 @@ class Parser
         {
             return PrintStatemnt();
         }
+
+        if (Match(LEFT_BRACE))
+        {
+            return new Stmt.Block(Block());
+        }
+
         return ExpressionStatemnt();
+    }
+
+    private IList<Stmt> Block()
+    {
+        var statments = new List<Stmt>();
+
+        while (!Check(RIGHT_BRACE) && !IsAtEnd())
+        {
+            statments.Add(Declaration());
+        }
+
+        Consume(RIGHT_BRACE, "Expected '}' after block.");
+        return statments;
     }
 
     private Stmt ExpressionStatemnt()

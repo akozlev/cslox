@@ -30,6 +30,7 @@ public class GenerateAst
             "Stmt",
             new[]
             {
+                "Block              : IList<Stmt> statements",
                 "ExpressionStatment : Expr expression", // Expression Statement
                 "Print              : Expr expression",
                 "Var                : Token name, Expr initializer",
