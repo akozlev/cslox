@@ -45,13 +45,7 @@ class Parser
     {
         Token name = Consume(IDENTIFIER, "Expected variable name.");
 
-        Expr intializer = null;
-
-        if (Match(EQUAL))
-        {
-            intializer = Expression();
-        }
-
+        var intializer = MatchOrNull(EQUAL, Expression);
         Consume(SEMICOLON, "Expect ';' after variable declaration.");
 
         return new Stmt.Var(name, intializer);
@@ -59,9 +53,24 @@ class Parser
 
     private Stmt Statement()
     {
+        if (Match(FOR))
+        {
+            return ForStatement();
+        }
+
+        if (Match(IF))
+        {
+            return IfStatement();
+        }
+
         if (Match(PRINT))
         {
             return PrintStatemnt();
+        }
+
+        if (Match(WHILE))
+        {
+            return WhileStatment();
         }
 
         if (Match(LEFT_BRACE))
@@ -70,6 +79,84 @@ class Parser
         }
 
         return ExpressionStatemnt();
+    }
+
+    private Stmt ForStatement()
+    {
+        Consume(LEFT_PAREN, "Exprect '(' after 'if'.");
+
+        Stmt initializer;
+        if (Match(SEMICOLON))
+        {
+            initializer = null;
+        }
+        else if (Match(VAR))
+        {
+            initializer = VarDeclaration();
+        }
+        else
+        {
+            initializer = ExpressionStatemnt();
+        }
+
+        Expr condition = null;
+        if (!Check(SEMICOLON))
+        {
+            condition = Expression();
+        }
+
+        Consume(SEMICOLON, "Expect ';' after loop condition.");
+
+        Expr increment = null;
+        if (!Check(RIGHT_PAREN))
+        {
+            increment = Expression();
+        }
+
+        Consume(RIGHT_PAREN, "Expect ')' after for clauses.");
+
+        var body = Statement();
+
+        if (increment != null)
+        {
+            body = new Stmt.Block(new List<Stmt> { body, new Stmt.ExpressionStatment(increment) });
+        }
+
+        if (condition == null)
+        {
+            condition = new Expr.Literal(true);
+        }
+        body = new Stmt.While(condition, body);
+
+        if (initializer != null)
+        {
+            body = new Stmt.Block(new List<Stmt> { initializer, body });
+        }
+
+        return body;
+    }
+
+    private Stmt WhileStatment()
+    {
+        Consume(LEFT_PAREN, "Exprect '(' after 'if'.");
+        var condition = Expression();
+        Consume(RIGHT_PAREN, "Exprect '(' after 'if'.");
+
+        var body = Statement();
+
+        return new Stmt.While(condition, body);
+    }
+
+    private Stmt IfStatement()
+    {
+        Consume(LEFT_PAREN, "Exprect '(' after 'if'.");
+        var condition = Expression();
+        Consume(RIGHT_PAREN, "Exprect '(' after 'if'.");
+
+        var consequence = Statement();
+        var alternative = MatchOrNull(ELSE, Statement);
+
+        return new Stmt.If(condition, consequence, alternative);
     }
 
     private IList<Stmt> Block()
@@ -87,14 +174,14 @@ class Parser
 
     private Stmt ExpressionStatemnt()
     {
-        Expr value = Expression();
+        var value = Expression();
         Consume(SEMICOLON, "Expect ';' after value.");
         return new Stmt.ExpressionStatment(value);
     }
 
     private Stmt PrintStatemnt()
     {
-        Expr value = Expression();
+        var value = Expression();
         Consume(SEMICOLON, "Expect ';' after value.");
         return new Stmt.Print(value);
     }
@@ -106,12 +193,12 @@ class Parser
 
     private Expr Assignment()
     {
-        Expr expr = Equality();
+        var expr = Or();
 
         if (Match(EQUAL))
         {
-            Token equals = Previous();
-            Expr value = Assignment();
+            var equals = Previous();
+            var value = Assignment();
 
             if (expr is Expr.Variable { Name: var name })
             {
@@ -119,6 +206,34 @@ class Parser
             }
 
             Error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
+    }
+
+    private Expr Or()
+    {
+        var expr = And();
+
+        while (Match(OR))
+        {
+            var op = Previous();
+            var right = And();
+            expr = new Expr.Logical(expr, op, right);
+        }
+
+        return expr;
+    }
+
+    private Expr And()
+    {
+        var expr = Equality();
+
+        while (Match(AND))
+        {
+            var op = Previous();
+            var right = Equality();
+            expr = new Expr.Logical(expr, op, right);
         }
 
         return expr;
@@ -282,6 +397,18 @@ class Parser
         }
 
         return false;
+    }
+
+    private T MatchOrNull<T>(TokenType token, Func<T> func)
+    {
+        if (Match(token))
+        {
+            return func();
+        }
+        else
+        {
+            return default(T);
+        }
     }
 
     private bool Check(TokenType type)

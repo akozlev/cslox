@@ -227,4 +227,46 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
             _environment = previous;
         }
     }
+
+    public object Visit(Stmt.If stmt)
+    {
+        if (IsTruthy(Evaluate(stmt.Condition)))
+        {
+            Execute(stmt.Consequent);
+        }
+        else if (stmt.Alternative != null)
+        {
+            Execute(stmt.Alternative);
+        }
+
+        return null;
+    }
+
+    public object Visit(Expr.Logical expr)
+    {
+        var left = Evaluate(expr.Left);
+
+        if (expr.Op.Type == TokenType.OR)
+        {
+            if (IsTruthy(left))
+                return left;
+        }
+        else
+        {
+            if (!IsTruthy(left))
+                return left;
+        }
+
+        return Evaluate(expr.Right);
+    }
+
+    public object Visit(Stmt.While stmt)
+    {
+        while (IsTruthy(Evaluate(stmt.Condition)))
+        {
+            Execute(stmt.Body);
+        }
+
+        return null;
+    }
 }

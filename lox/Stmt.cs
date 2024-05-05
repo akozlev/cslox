@@ -6,8 +6,10 @@ internal abstract class Stmt
     {
         R Visit(Block stmt);
         R Visit(ExpressionStatment stmt);
+        R Visit(If stmt);
         R Visit(Print stmt);
         R Visit(Var stmt);
+        R Visit(While stmt);
     }
 
     internal abstract R Accept<R>(IExprVisitor<R> visitor);
@@ -42,6 +44,25 @@ internal abstract class Stmt
         }
     }
 
+    internal class If : Stmt
+    {
+        public Expr Condition { get; }
+        public Stmt Consequent { get; }
+        public Stmt Alternative { get; }
+
+        internal If(Expr condition, Stmt consequent, Stmt alternative)
+        {
+            Condition = condition;
+            Consequent = consequent;
+            Alternative = alternative;
+        }
+
+        internal override R Accept<R>(IExprVisitor<R> visitor)
+        {
+            return visitor.Visit(this); 
+        }
+    }
+
     internal class Print : Stmt
     {
         public Expr Expression { get; }
@@ -66,6 +87,23 @@ internal abstract class Stmt
         {
             Name = name;
             Initializer = initializer;
+        }
+
+        internal override R Accept<R>(IExprVisitor<R> visitor)
+        {
+            return visitor.Visit(this); 
+        }
+    }
+
+    internal class While : Stmt
+    {
+        public Expr Condition { get; }
+        public Stmt Body { get; }
+
+        internal While(Expr condition, Stmt body)
+        {
+            Condition = condition;
+            Body = body;
         }
 
         internal override R Accept<R>(IExprVisitor<R> visitor)

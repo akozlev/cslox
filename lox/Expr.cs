@@ -8,6 +8,7 @@ internal abstract class Expr
         R Visit(Binary expr);
         R Visit(Grouping expr);
         R Visit(Literal expr);
+        R Visit(Logical expr);
         R Visit(Unary expr);
         R Visit(Variable expr);
     }
@@ -72,6 +73,25 @@ internal abstract class Expr
         internal Literal(Object value)
         {
             Value = value;
+        }
+
+        internal override R Accept<R>(IExprVisitor<R> visitor)
+        {
+            return visitor.Visit(this); 
+        }
+    }
+
+    internal class Logical : Expr
+    {
+        public Expr Left { get; }
+        public Token Op { get; }
+        public Expr Right { get; }
+
+        internal Logical(Expr left, Token op, Expr right)
+        {
+            Left = left;
+            Op = op;
+            Right = right;
         }
 
         internal override R Accept<R>(IExprVisitor<R> visitor)
