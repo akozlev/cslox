@@ -8,7 +8,7 @@ generate-ast:
   cd {{lox_dir}} && {{tool_bin}} ./
 
 run-interpreter:
-  cd {{lox_dir}} && dotnet run $(fdfind .lox | fzf --height=12)
+  cd {{lox_dir}} && dotnet run $(fd .lox | fzf --height=12)
 
 build-interpreter:
   cd {{lox_dir}} && dotnet build
