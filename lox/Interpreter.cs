@@ -76,6 +76,31 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
         return null;
     }
 
+    public object Visit(Expr.Call expr) {
+        object callee = Evaluate(expr.Callee);
+
+        var arguments = new List<object>();
+
+        foreach (var arg in expr.Arguments) {
+            arguments.Add(Evaluate(arg));
+        }
+
+        if (callee is not ICallable) {
+            throw new RuntimeError(expr.Paren, "Can only call functions and classes.");
+        }
+
+        var function = (ICallable) callee;
+
+        if (arguments.Count != function.Arity) {
+            throw new RuntimeError(
+                expr.Paren,
+                $"Expected {function.Arity} arguments but got {arguments.Count}."
+            );
+        }
+
+        return function.Call(this, arguments);
+    }
+
     private bool IsEqual(object a, object b)
     {
         if (a is null && b is null)
