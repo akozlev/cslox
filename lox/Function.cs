@@ -20,7 +20,15 @@ class Function : ICallable
             env.Define(_declaration.Parameters[i].Lexeme, arguments[i]);
         }
 
-        interpreter.ExecuteBlock(_declaration.Body, env);
+        try
+        {
+            interpreter.ExecuteBlock(_declaration.Body, env);
+        }
+        catch (Return returnValue)
+        {
+            return returnValue.Value;
+        }
+
         return null;
     }
 

@@ -37,6 +37,7 @@ public class GenerateAst
                 "Function   : Token name, IList<Token> parameters, IList<Stmt> body",
                 "If         : Expr condition, Stmt consequent, Stmt alternative",
                 "Print      : Expr expr",
+                "Return     : Token keyword, Expr value",
                 "Var        : Token name, Expr initializer",
                 "While      : Expr condition, Stmt body",
             }

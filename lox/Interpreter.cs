@@ -319,6 +319,15 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
         return null;
     }
 
+    public object Visit(Stmt.Return stmt)
+    {
+        object value = null;
+        if (stmt.Value is not null)
+            value = Evaluate(stmt.Value);
+
+        throw new Return(value);
+    }
+
     private class Clock : ICallable
     {
         public int Arity => 0;

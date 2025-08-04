@@ -56,29 +56,22 @@ class Parser
     private Stmt Statement()
     {
         if (Match(FOR))
-        {
             return ForStatement();
-        }
 
         if (Match(IF))
-        {
             return IfStatement();
-        }
 
         if (Match(PRINT))
-        {
-            return PrintStatemnt();
-        }
+            return PrintStatement();
+
+        if (Match(RETURN))
+            return ReturnStatment();
 
         if (Match(WHILE))
-        {
             return WhileStatement();
-        }
 
         if (Match(LEFT_BRACE))
-        {
             return new Stmt.Block(Block());
-        }
 
         return ExpressionStatemnt();
     }
@@ -210,11 +203,25 @@ class Parser
         return new Stmt.Function(name, parameters, body);
     }
 
-    private Stmt PrintStatemnt()
+    private Stmt PrintStatement()
     {
         var value = Expression();
         Consume(SEMICOLON, "Expect ';' after value.");
         return new Stmt.Print(value);
+    }
+
+    private Stmt ReturnStatment()
+    {
+        var keyword = Previous();
+        Expr value = null;
+
+        if (!Check(SEMICOLON))
+        {
+            value = Expression();
+        }
+        Consume(SEMICOLON, "Expect ';' after return value.");
+
+        return new Stmt.Return(keyword, value);
     }
 
     private Expr Expression()
