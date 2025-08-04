@@ -10,18 +10,19 @@ class Lox
 
     public static void Main(string[] args)
     {
-        if (args.Length > 1)
+        switch (args.Length) 
         {
-            Console.WriteLine("Usage: cslox [script]");
-            Environment.Exit(64);
-        }
-        else if (args.Length == 1)
-        {
-            RunFile(args[0]);
-        }
-        else
-        {
-            RunPrompt();
+            case > 1:
+                Console.WriteLine("Usage: cslox [script]");
+                Environment.Exit(64);
+                break;
+            case 1:
+                RunFile(args[0]);
+                break;
+            default:
+                RunPrompt();
+                break;
+
         }
     }
 
