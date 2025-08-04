@@ -212,15 +212,15 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
         return true;
     }
 
-    public object Visit(Stmt.ExpressionStatment stmt)
+    public object Visit(Stmt.Expression stmt)
     {
-        Evaluate(stmt.Expression);
+        Evaluate(stmt.Expr);
         return null;
     }
 
     public object Visit(Stmt.Print stmt)
     {
-        var value = Evaluate(stmt.Expression);
+        var value = Evaluate(stmt.Expr);
         Console.WriteLine(Stringify(value));
         return null;
     }

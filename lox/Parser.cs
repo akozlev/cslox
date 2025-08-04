@@ -70,7 +70,7 @@ class Parser
 
         if (Match(WHILE))
         {
-            return WhileStatment();
+            return WhileStatement();
         }
 
         if (Match(LEFT_BRACE))
@@ -119,7 +119,7 @@ class Parser
 
         if (increment != null)
         {
-            body = new Stmt.Block(new List<Stmt> { body, new Stmt.ExpressionStatment(increment) });
+            body = new Stmt.Block(new List<Stmt> { body, new Stmt.Expression(increment) });
         }
 
         if (condition == null)
@@ -136,7 +136,7 @@ class Parser
         return body;
     }
 
-    private Stmt WhileStatment()
+    private Stmt WhileStatement()
     {
         Consume(LEFT_PAREN, "Exprect '(' after 'if'.");
         var condition = Expression();
@@ -176,7 +176,7 @@ class Parser
     {
         var value = Expression();
         Consume(SEMICOLON, "Expect ';' after value.");
-        return new Stmt.ExpressionStatment(value);
+        return new Stmt.Expression(value);
     }
 
     private Stmt PrintStatemnt()

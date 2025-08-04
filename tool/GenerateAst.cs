@@ -32,12 +32,12 @@ public class GenerateAst
             "Stmt",
             new[]
             {
-                "Block              : IList<Stmt> statements",
-                "ExpressionStatment : Expr expression", // Expression Statement
-                "If                 : Expr condition, Stmt consequent, Stmt alternative",
-                "Print              : Expr expression",
-                "Var                : Token name, Expr initializer",
-                "While              : Expr condition, Stmt body",
+                "Block      : IList<Stmt> statements",
+                "Expression : Expr expr",
+                "If         : Expr condition, Stmt consequent, Stmt alternative",
+                "Print      : Expr expr",
+                "Var        : Token name, Expr initializer",
+                "While      : Expr condition, Stmt body",
             }
         );
     }

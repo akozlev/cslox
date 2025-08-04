@@ -5,7 +5,7 @@ internal abstract class Stmt
     internal interface IExprVisitor<R>
     {
         R Visit(Block stmt);
-        R Visit(ExpressionStatment stmt);
+        R Visit(Expression stmt);
         R Visit(If stmt);
         R Visit(Print stmt);
         R Visit(Var stmt);
@@ -29,13 +29,13 @@ internal abstract class Stmt
         }
     }
 
-    internal class ExpressionStatment : Stmt
+    internal class Expression : Stmt
     {
-        public Expr Expression { get; }
+        public Expr Expr { get; }
 
-        internal ExpressionStatment(Expr expression)
+        internal Expression(Expr expr)
         {
-            Expression = expression;
+            Expr = expr;
         }
 
         internal override R Accept<R>(IExprVisitor<R> visitor)
@@ -65,11 +65,11 @@ internal abstract class Stmt
 
     internal class Print : Stmt
     {
-        public Expr Expression { get; }
+        public Expr Expr { get; }
 
-        internal Print(Expr expression)
+        internal Print(Expr expr)
         {
-            Expression = expression;
+            Expr = expr;
         }
 
         internal override R Accept<R>(IExprVisitor<R> visitor)
