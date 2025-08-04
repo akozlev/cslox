@@ -314,7 +314,7 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
 
     public object Visit(Stmt.Function stmt)
     {
-        var func = new Function(stmt);
+        var func = new Function(stmt, _environment);
         _environment.Define(stmt.Name.Lexeme, func);
         return null;
     }

@@ -3,9 +3,11 @@ namespace CraftingInterpreters.Lox;
 class Function : ICallable
 {
     private readonly Stmt.Function _declaration;
+    private readonly Env _closure;
 
-    public Function(Stmt.Function declaration)
+    public Function(Stmt.Function declaration, Env closure)
     {
+        _closure = closure;
         _declaration = declaration;
     }
 
@@ -13,7 +15,7 @@ class Function : ICallable
 
     public object Call(Interpreter interpreter, List<object> arguments)
     {
-        var env = new Env(interpreter.Globals);
+        var env = new Env(_closure);
 
         for (int i = 0; i < _declaration.Parameters.Count; i++)
         {
