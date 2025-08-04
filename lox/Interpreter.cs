@@ -6,7 +6,14 @@ using static TokenType;
 
 class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
 {
-    private Env _environment = new();
+    private readonly Env _globals = new();
+    private Env _environment;
+
+    public Interpreter() {
+        _environment = _globals;
+
+        _globals.Define("clock", new Clock());
+    }
 
     public void Interpret(List<Stmt> statements)
     {
@@ -293,5 +300,20 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
         }
 
         return null;
+    }
+
+    private class Clock : ICallable
+    {
+        public int Arity => 0;
+
+        public object Call(Interpreter interpreter, List<object> arguments)
+        {
+            return (double) DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond;
+        }
+
+        public override string ToString()
+        {
+            return "<native fn>";
+        }
     }
 }
