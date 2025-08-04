@@ -2,9 +2,9 @@ using System.Text;
 
 namespace CraftingInterpreters.Lox;
 
-class AstPrinter : Expr.IExprVisitor<String>
+class AstPrinter : Expr.IExprVisitor<string>
 {
-    public String Print(Expr expr)
+    public string Print(Expr expr)
     {
         return expr.Accept(this);
     }
@@ -33,20 +33,25 @@ class AstPrinter : Expr.IExprVisitor<String>
 
     public string Visit(Expr.Variable expr)
     {
-        throw new NotImplementedException();
+        return expr.ToString();
     }
 
     public string Visit(Expr.Assign expr)
     {
-        throw new NotImplementedException();
+        return Parenthesize($"assign {expr.Name}", expr.Value);
     }
 
     public string Visit(Expr.Logical expr)
     {
-        throw new NotImplementedException();
+        return Parenthesize(expr.Op.ToString(), expr.Left, expr.Right);
     }
 
-    private String Parenthesize(String name, params Expr[] exprs)
+    public string Visit(Expr.Call expr)
+    {
+        return Parenthesize(expr.Callee.ToString(), expr.Arguments.ToArray());
+    }
+
+    private string Parenthesize(String name, params Expr[] exprs)
     {
         var sb = new StringBuilder();
 
