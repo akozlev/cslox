@@ -34,6 +34,7 @@ public class GenerateAst
             {
                 "Block      : IList<Stmt> statements",
                 "Expression : Expr expr",
+                "Function   : Token name, IList<Token> parameters, IList<Stmt> body",
                 "If         : Expr condition, Stmt consequent, Stmt alternative",
                 "Print      : Expr expr",
                 "Var        : Token name, Expr initializer",

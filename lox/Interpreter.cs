@@ -9,7 +9,13 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
     private readonly Env _globals = new();
     private Env _environment;
 
-    public Interpreter() {
+    public Env Globals
+    {
+        get => _globals;
+    }
+
+    public Interpreter()
+    {
         _environment = _globals;
 
         _globals.Define("clock", new Clock());
@@ -83,22 +89,26 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
         return null;
     }
 
-    public object Visit(Expr.Call expr) {
+    public object Visit(Expr.Call expr)
+    {
         object callee = Evaluate(expr.Callee);
 
         var arguments = new List<object>();
 
-        foreach (var arg in expr.Arguments) {
+        foreach (var arg in expr.Arguments)
+        {
             arguments.Add(Evaluate(arg));
         }
 
-        if (callee is not ICallable) {
+        if (callee is not ICallable)
+        {
             throw new RuntimeError(expr.Paren, "Can only call functions and classes.");
         }
 
-        var function = (ICallable) callee;
+        var function = (ICallable)callee;
 
-        if (arguments.Count != function.Arity) {
+        if (arguments.Count != function.Arity)
+        {
             throw new RuntimeError(
                 expr.Paren,
                 $"Expected {function.Arity} arguments but got {arguments.Count}."
@@ -243,7 +253,7 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
         return null;
     }
 
-    private void ExecuteBlock(IList<Stmt> statements, Env environment)
+    public void ExecuteBlock(IList<Stmt> statements, Env environment)
     {
         var previous = _environment;
         try
@@ -302,13 +312,20 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
         return null;
     }
 
+    public object Visit(Stmt.Function stmt)
+    {
+        var func = new Function(stmt);
+        _environment.Define(stmt.Name.Lexeme, func);
+        return null;
+    }
+
     private class Clock : ICallable
     {
         public int Arity => 0;
 
         public object Call(Interpreter interpreter, List<object> arguments)
         {
-            return (double) DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond;
+            return (double)DateTime.UtcNow.Ticks / TimeSpan.TicksPerSecond;
         }
 
         public override string ToString()

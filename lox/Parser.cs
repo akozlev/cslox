@@ -30,6 +30,8 @@ class Parser
     {
         try
         {
+            if (Match(FUN))
+                return Function("function");
             if (Match(VAR))
                 return VarDeclaration();
             return Statement();
@@ -179,6 +181,35 @@ class Parser
         return new Stmt.Expression(value);
     }
 
+    private Stmt Function(string kind)
+    {
+        Token name = Consume(IDENTIFIER, $"Expect {kind} name.");
+
+        Consume(LEFT_PAREN, $"Expect '(' after {kind} name.");
+        List<Token> parameters = new();
+
+        if (!Check(RIGHT_PAREN))
+        {
+            do
+            {
+                if (parameters.Count >= 255)
+                {
+                    Error(Peek(), "Can't have more than 255 parameters");
+                }
+
+                parameters.Add(Consume(IDENTIFIER, "Expect parameter name."));
+            } while (Match(COMMA));
+        }
+
+        Consume(RIGHT_PAREN, "Expect ')' after parameters.");
+
+        Consume(LEFT_BRACE, $"Expect '{{' before {kind} body.");
+
+        var body = Block();
+
+        return new Stmt.Function(name, parameters, body);
+    }
+
     private Stmt PrintStatemnt()
     {
         var value = Expression();
@@ -307,12 +338,16 @@ class Parser
         return Call();
     }
 
-    private Expr FinishCall(Expr callee) {
+    private Expr FinishCall(Expr callee)
+    {
         List<Expr> arguments = new();
 
-        if (!Check(RIGHT_PAREN)) {
-            do { 
-                if (arguments.Count >= 255) {
+        if (!Check(RIGHT_PAREN))
+        {
+            do
+            {
+                if (arguments.Count >= 255)
+                {
                     Error(Peek(), "Can't have more than 255 arguments.");
                 }
                 arguments.Add(Expression());
@@ -324,14 +359,18 @@ class Parser
         return new Expr.Call(callee, paren, arguments);
     }
 
-    private Expr Call() 
+    private Expr Call()
     {
         Expr expr = Primary();
 
-        while(true) {
-            if (Match(LEFT_PAREN)) {
+        while (true)
+        {
+            if (Match(LEFT_PAREN))
+            {
                 expr = FinishCall(expr);
-            } else {
+            }
+            else
+            {
                 break;
             }
         }

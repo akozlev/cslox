@@ -6,6 +6,7 @@ internal abstract class Stmt
     {
         R Visit(Block stmt);
         R Visit(Expression stmt);
+        R Visit(Function stmt);
         R Visit(If stmt);
         R Visit(Print stmt);
         R Visit(Var stmt);
@@ -36,6 +37,25 @@ internal abstract class Stmt
         internal Expression(Expr expr)
         {
             Expr = expr;
+        }
+
+        internal override R Accept<R>(IExprVisitor<R> visitor)
+        {
+            return visitor.Visit(this); 
+        }
+    }
+
+    internal class Function : Stmt
+    {
+        public Token Name { get; }
+        public IList<Token> Parameters { get; }
+        public IList<Stmt> Body { get; }
+
+        internal Function(Token name, IList<Token> parameters, IList<Stmt> body)
+        {
+            Name = name;
+            Parameters = parameters;
+            Body = body;
         }
 
         internal override R Accept<R>(IExprVisitor<R> visitor)
