@@ -10,7 +10,7 @@ class Lox
 
     public static void Main(string[] args)
     {
-        switch (args.Length) 
+        switch (args.Length)
         {
             case > 1:
                 Console.WriteLine("Usage: cslox [script]");
@@ -22,7 +22,6 @@ class Lox
             default:
                 RunPrompt();
                 break;
-
         }
     }
 
@@ -71,6 +70,14 @@ class Lox
         var statements = parser.Parse();
         if (_hadError)
             return;
+
+        var resolver = new Resolver(_interpreter);
+        resolver.Resolve(statements);
+
+        // Stop if there is a resolution error.
+        if (_hadError)
+            return;
+
         _interpreter.Interpret(statements);
     }
 

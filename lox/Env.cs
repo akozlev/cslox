@@ -20,6 +20,16 @@ class Env
         _values[name] = value;
     }
 
+    private Env Ancestor(int distance)
+    {
+        var environment = this;
+        for (int i = 0; i < distance; i++)
+        {
+            environment = environment._enclosing;
+        }
+        return environment;
+    }
+
     internal object Get(Token name)
     {
         object value;
@@ -51,5 +61,15 @@ class Env
         }
 
         throw new RuntimeError(name, $"Assignment to undefined variable {name.Lexeme}.");
+    }
+
+    internal object GetAt(int distance, string name)
+    {
+        return Ancestor(distance)._values[name];
+    }
+
+    internal void AssignAt(int distance, Token name, object value)
+    {
+        Ancestor(distance)._values.Add(name.Lexeme, value);
     }
 }

@@ -7,6 +7,7 @@ using static TokenType;
 class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
 {
     private readonly Env _globals = new();
+    private readonly Dictionary<Expr, int> _locals = new();
     private Env _environment;
 
     public Env Globals
@@ -174,13 +175,27 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
 
     public object Visit(Expr.Variable expr)
     {
-        return _environment.Get(expr.Name);
+        return LookUpVariable(expr.Name, expr);
+    }
+
+    private object LookUpVariable(Token name, Expr expr)
+    {
+        return _locals.TryGetValue(expr, out var distance)
+            ? _environment.GetAt(distance, name.Lexeme)
+            : _globals.Get(name);
     }
 
     public object Visit(Expr.Assign expr)
     {
         var value = Evaluate(expr.Value);
-        _environment.Assign(expr.Name, value);
+        if (_locals.TryGetValue(expr, out var distance))
+        {
+            _environment.AssignAt(distance, expr.Name, value);
+        }
+        else
+        {
+            _globals.Assign(expr.Name, value);
+        }
         return value;
     }
 
@@ -326,6 +341,11 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
             value = Evaluate(stmt.Value);
 
         throw new Return(value);
+    }
+
+    internal void Resolve(Expr expr, int depth)
+    {
+        _locals.Add(expr, depth);
     }
 
     private class Clock : ICallable
