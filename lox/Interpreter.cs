@@ -348,6 +348,15 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
         _locals.Add(expr, depth);
     }
 
+    public object Visit(Stmt.Class stmt)
+    {
+        _environment.Define(stmt.Name.Lexeme, null);
+        var @class = new Class(stmt.Name.Lexeme);
+        _environment.Assign(stmt.Name, @class);
+
+        return null;
+    }
+
     private class Clock : ICallable
     {
         public int Arity => 0;

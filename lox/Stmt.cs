@@ -5,6 +5,7 @@ internal abstract class Stmt
     internal interface IExprVisitor<R>
     {
         R Visit(Block stmt);
+        R Visit(Class stmt);
         R Visit(Expression stmt);
         R Visit(Function stmt);
         R Visit(If stmt);
@@ -23,6 +24,23 @@ internal abstract class Stmt
         internal Block(IList<Stmt> statements)
         {
             Statements = statements;
+        }
+
+        internal override R Accept<R>(IExprVisitor<R> visitor)
+        {
+            return visitor.Visit(this); 
+        }
+    }
+
+    internal class Class : Stmt
+    {
+        public Token Name { get; }
+        public IList<Stmt.Function> Methods { get; }
+
+        internal Class(Token name, IList<Stmt.Function> methods)
+        {
+            Name = name;
+            Methods = methods;
         }
 
         internal override R Accept<R>(IExprVisitor<R> visitor)

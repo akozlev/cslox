@@ -30,10 +30,15 @@ class Parser
     {
         try
         {
+            if (Match(CLASS))
+                return ClassDeclaration();
+
             if (Match(FUN))
                 return Function("function");
+
             if (Match(VAR))
                 return VarDeclaration();
+
             return Statement();
         }
         catch
@@ -41,6 +46,23 @@ class Parser
             Synchronize();
             return null;
         }
+    }
+
+    private Stmt ClassDeclaration()
+    {
+        Token name = Consume(IDENTIFIER, "Expected class name.");
+        Consume(LEFT_BRACE, "Expect '{' before class body.");
+
+        var methods = new List<Stmt.Function>();
+
+        while (!Check(RIGHT_BRACE) && !IsAtEnd())
+        {
+            methods.Add(Function("method"));
+        }
+
+        Consume(RIGHT_BRACE, "Expect '}' after class body.");
+
+        return new Stmt.Class(name, methods);
     }
 
     private Stmt VarDeclaration()
@@ -174,7 +196,7 @@ class Parser
         return new Stmt.Expression(value);
     }
 
-    private Stmt Function(string kind)
+    private Stmt.Function Function(string kind)
     {
         Token name = Consume(IDENTIFIER, $"Expect {kind} name.");
 

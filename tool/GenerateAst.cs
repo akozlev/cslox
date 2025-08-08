@@ -33,6 +33,7 @@ public class GenerateAst
             new[]
             {
                 "Block      : IList<Stmt> statements",
+                "Class      : Token name, IList<Stmt.Function> methods",
                 "Expression : Expr expr",
                 "Function   : Token name, IList<Token> parameters, IList<Stmt> body",
                 "If         : Expr condition, Stmt consequent, Stmt alternative",

@@ -235,4 +235,11 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
         ResolveLocal(expr, expr.Name);
         return default;
     }
+
+    public Void Visit(Stmt.Class stmt)
+    {
+        Declare(stmt.Name);
+        Define(stmt.Name);
+        return default;
+    }
 }
