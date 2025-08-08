@@ -1,5 +1,7 @@
 namespace CraftingInterpreters.Tool;
 
+using System.Collections.Generic;
+
 public class GenerateAst
 {
     public static void Main(string[] args)
@@ -19,6 +21,7 @@ public class GenerateAst
                 "Assign   : Token name, Expr value",
                 "Binary   : Expr left, Token op, Expr right",
                 "Call     : Expr callee, Token paren, IList<Expr> arguments",
+                "Get      : Expr object, Token name",
                 "Grouping : Expr expression",
                 "Literal  : Object value",
                 "Logical  : Expr left, Token op, Expr right",
@@ -84,7 +87,7 @@ public class GenerateAst
         foreach (var type in types)
         {
             var typeName = type.Split(":")[0].Trim();
-            output.WriteLine($"        R Visit({typeName} {baseName.ToLower()});");
+            output.WriteLine($"        R Visit({typeName} {baseName.Safe()});");
         }
 
         output.WriteLine("    }");
@@ -111,13 +114,20 @@ public class GenerateAst
         }
         output.WriteLine();
 
+        var safeFields = new List<string>();
+        foreach (var field in fields)
+        {
+            var type = field.Split(" ")[0];
+            var name = field.Split(" ")[1];
+            safeFields.Add($"{type} {name.Safe()}");
+        }
         // Constructor
-        output.WriteLine($"        internal {className}({fieldList})");
+        output.WriteLine($"        internal {className}({string.Join(", ", safeFields)})");
         output.WriteLine("        {");
         foreach (var field in fields)
         {
             var name = field.Split(" ")[1];
-            output.WriteLine($"            {name.CharAtToUpper()} = {name.ToLower()};");
+            output.WriteLine($"            {name.CharAtToUpper()} = {name.Safe()};");
         }
         output.WriteLine("        }");
         output.WriteLine();
@@ -145,5 +155,23 @@ static class HelperExtensions
         chars[index] = char.ToUpperInvariant(chars[index]);
 
         return new string(chars);
+    }
+
+    private static HashSet<string> keyword = new(
+        new string[]
+        {
+            "class", //
+            "object",
+        }
+    );
+
+    public static string Safe(this string value)
+    {
+        var lowered = value.ToLower();
+        if (keyword.Contains(lowered))
+        {
+            return $"@{lowered}";
+        }
+        return lowered;
     }
 }

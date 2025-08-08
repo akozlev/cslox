@@ -119,6 +119,19 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
         return function.Call(this, arguments);
     }
 
+    public object Visit(Expr.Get expr)
+    {
+        object @object = Evaluate(expr.Object);
+
+        if (@object is Instance instance)
+        {
+            return instance.Get(expr.Name);
+        }
+
+        throw new RuntimeError(expr.Name, "Only instance have properties.");
+
+    }
+
     private bool IsEqual(object a, object b)
     {
         if (a is null && b is null)

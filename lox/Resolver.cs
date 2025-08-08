@@ -236,6 +236,12 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
         return default;
     }
 
+    public Void Visit(Expr.Get expr)
+    {
+        Resolve(expr.Object);
+        return default;
+    }
+
     public Void Visit(Stmt.Class stmt)
     {
         Declare(stmt.Name);

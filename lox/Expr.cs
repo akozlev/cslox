@@ -7,6 +7,7 @@ internal abstract class Expr
         R Visit(Assign expr);
         R Visit(Binary expr);
         R Visit(Call expr);
+        R Visit(Get expr);
         R Visit(Grouping expr);
         R Visit(Literal expr);
         R Visit(Logical expr);
@@ -63,6 +64,23 @@ internal abstract class Expr
             Callee = callee;
             Paren = paren;
             Arguments = arguments;
+        }
+
+        internal override R Accept<R>(IExprVisitor<R> visitor)
+        {
+            return visitor.Visit(this); 
+        }
+    }
+
+    internal class Get : Expr
+    {
+        public Expr Object { get; }
+        public Token Name { get; }
+
+        internal Get(Expr @object, Token name)
+        {
+            Object = @object;
+            Name = name;
         }
 
         internal override R Accept<R>(IExprVisitor<R> visitor)
