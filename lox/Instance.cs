@@ -24,4 +24,9 @@ class Instance
 
         throw new RuntimeError(name, $"Undefined property '{name.Lexeme}'");
     }
+
+    internal void Set(Token name, object value)
+    {
+        _fields.Add(name.Lexeme, value);
+    }
 }

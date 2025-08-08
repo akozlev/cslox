@@ -129,7 +129,6 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
         }
 
         throw new RuntimeError(expr.Name, "Only instance have properties.");
-
     }
 
     private bool IsEqual(object a, object b)
@@ -328,6 +327,20 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
         }
 
         return Evaluate(expr.Right);
+    }
+
+    public object Visit(Expr.Set expr)
+    {
+        var @object = Evaluate(expr.Object);
+
+        if (@object is Instance obj)
+        {
+            var value = Evaluate(expr.Value);
+            obj.Set(expr.Name, value);
+            return value;
+        }
+
+        throw new RuntimeError(expr.Name, "Only instances have fields");
     }
 
     public object Visit(Stmt.While stmt)

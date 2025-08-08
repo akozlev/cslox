@@ -215,6 +215,13 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
         return default;
     }
 
+    public Void Visit(Expr.Set expr)
+    {
+        Resolve(expr.Value);
+        Resolve(expr.Object);
+        return default;
+    }
+
     public Void Visit(Expr.Unary expr)
     {
         Resolve(expr.Right);

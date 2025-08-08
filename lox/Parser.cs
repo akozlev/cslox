@@ -263,6 +263,8 @@ class Parser
             if (expr is Expr.Variable { Name: var name })
             {
                 return new Expr.Assign(name, value);
+            } else if (expr is Expr.Get get) {
+                return new Expr.Set(get.Object, get.Name, value);
             }
 
             Error(equals, "Invalid assignment target.");
