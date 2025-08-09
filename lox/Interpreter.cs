@@ -101,12 +101,10 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
             arguments.Add(Evaluate(arg));
         }
 
-        if (callee is not ICallable)
+        if (callee is not ICallable function)
         {
             throw new RuntimeError(expr.Paren, "Can only call functions and classes.");
         }
-
-        var function = (ICallable)callee;
 
         if (arguments.Count != function.Arity)
         {
@@ -343,6 +341,11 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
         throw new RuntimeError(expr.Name, "Only instances have fields");
     }
 
+    public object Visit(Expr.This expr)
+    {
+        return LookUpVariable(expr.Keyword, expr);
+    }
+
     public object Visit(Stmt.While stmt)
     {
         while (IsTruthy(Evaluate(stmt.Condition)))
@@ -377,10 +380,12 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
     public object Visit(Stmt.Class stmt)
     {
         _environment.Define(stmt.Name.Lexeme, null);
+
         var methods = new Dictionary<string, Function>();
-        foreach (var method in stmt.Methods) {
+        foreach (var method in stmt.Methods)
+        {
             var function = new Function(method, _environment);
-            methods.Add(method.Name.Lexeme, function);
+            methods[method.Name.Lexeme] = function;
         }
 
         var @class = new Class(stmt.Name.Lexeme, methods);

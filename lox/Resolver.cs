@@ -8,8 +8,9 @@ public struct Void { }
 class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
 {
     private readonly Interpreter _interpreter;
-    private Stack<Dictionary<string, bool>> scopes = new();
+    private Stack<Dictionary<string, bool>> _scopes = new();
     private FunctionType _currentFunction = FunctionType.None;
+    private ClassType _currentClass = ClassType.None;
 
     public Resolver(Interpreter interpreter)
     {
@@ -31,6 +32,12 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
         Method,
     }
 
+    private enum ClassType
+    {
+        None,
+        Class,
+    }
+
     private void Resolve(Stmt stmt)
     {
         stmt.Accept(this);
@@ -43,17 +50,17 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
 
     private void BeginScope()
     {
-        scopes.Push(new Dictionary<string, bool>());
+        _scopes.Push(new Dictionary<string, bool>());
     }
 
     private void EndScope()
     {
-        scopes.Pop();
+        _scopes.Pop();
     }
 
     private void Declare(Token name)
     {
-        if (scopes.TryPeek(out var scope))
+        if (_scopes.TryPeek(out var scope))
         {
             if (scope.TryAdd(name.Lexeme, false) is false)
             {
@@ -64,7 +71,7 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
 
     private void Define(Token name)
     {
-        if (scopes.TryPeek(out var scope))
+        if (_scopes.TryPeek(out var scope))
         {
             scope[name.Lexeme] = true;
         }
@@ -72,11 +79,11 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
 
     private void ResolveLocal(Expr expr, Token name)
     {
-        for (int i = scopes.Count - 1; i >= 0; i--)
+        foreach (var (index, scope) in _scopes.Index())
         {
-            if (scopes.ElementAt(i).ContainsKey(name.Lexeme))
+            if (scope.ContainsKey(name.Lexeme))
             {
-                _interpreter.Resolve(expr, scopes.Count - 1 - i);
+                _interpreter.Resolve(expr, index);
                 return;
             }
         }
@@ -223,6 +230,17 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
         return default;
     }
 
+    public Void Visit(Expr.This expr)
+    {
+        if (_currentClass is ClassType.None) {
+            Lox.Error(expr.Keyword, "Can't use 'this' outside of a class.");
+            return default;
+        }
+
+        ResolveLocal(expr, expr.Keyword);
+        return default;
+    }
+
     public Void Visit(Expr.Unary expr)
     {
         Resolve(expr.Right);
@@ -232,7 +250,7 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
     public Void Visit(Expr.Variable expr)
     {
         if (
-            scopes.TryPeek(out var scope)
+            _scopes.TryPeek(out var scope)
             && scope.TryGetValue(expr.Name.Lexeme, out var value)
             && value is false
         )
@@ -252,8 +270,14 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
 
     public Void Visit(Stmt.Class stmt)
     {
+        var enclosingClass = _currentClass;
+        _currentClass = ClassType.Class;
+
         Declare(stmt.Name);
         Define(stmt.Name);
+
+        BeginScope();
+        _scopes.Peek()["this"] = true;
 
         foreach (var method in stmt.Methods)
         {
@@ -261,6 +285,9 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
             ResolveFunction(method, declaration);
         }
 
+        EndScope();
+
+        _currentClass = enclosingClass;
         return default;
     }
 }

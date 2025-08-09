@@ -24,7 +24,7 @@ class Instance
 
         var method = _class.FindMethod(name.Lexeme);
         if (method is not null)
-            return method;
+            return method.Bind(this);
 
         throw new RuntimeError(name, $"Undefined property '{name.Lexeme}'");
     }

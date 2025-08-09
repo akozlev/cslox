@@ -38,4 +38,11 @@ class Function : ICallable
     {
         return $"<fn {_declaration.Name.Lexeme}";
     }
+
+    internal Function Bind(Instance instance)
+    {
+        var environment = new Env(_closure);
+        environment.Define("this", instance);
+        return new Function(_declaration, environment);
+    }
 }
