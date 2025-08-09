@@ -377,7 +377,13 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
     public object Visit(Stmt.Class stmt)
     {
         _environment.Define(stmt.Name.Lexeme, null);
-        var @class = new Class(stmt.Name.Lexeme);
+        var methods = new Dictionary<string, Function>();
+        foreach (var method in stmt.Methods) {
+            var function = new Function(method, _environment);
+            methods.Add(method.Name.Lexeme, function);
+        }
+
+        var @class = new Class(stmt.Name.Lexeme, methods);
         _environment.Assign(stmt.Name, @class);
 
         return null;

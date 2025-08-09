@@ -28,6 +28,7 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
     {
         None,
         Function,
+        Method,
     }
 
     private void Resolve(Stmt stmt)
@@ -253,6 +254,13 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
     {
         Declare(stmt.Name);
         Define(stmt.Name);
+
+        foreach (var method in stmt.Methods)
+        {
+            var declaration = FunctionType.Method;
+            ResolveFunction(method, declaration);
+        }
+
         return default;
     }
 }

@@ -3,12 +3,14 @@ namespace CraftingInterpreters.Lox;
 class Class : ICallable
 {
     public readonly string Name;
+    private readonly Dictionary<string, Function> _methods;
 
     public int Arity => 0;
 
-    public Class(string name)
+    public Class(string name, Dictionary<string, Function> methods)
     {
         Name = name;
+        _methods = methods;
     }
 
     public object Call(Interpreter interpreter, List<object> arguments)
@@ -20,5 +22,15 @@ class Class : ICallable
     public override string ToString()
     {
         return Name;
+    }
+
+    internal Function FindMethod(string name)
+    {
+        if (_methods.TryGetValue(name, out var method))
+        {
+            return method;
+        }
+
+        return null;
     }
 }

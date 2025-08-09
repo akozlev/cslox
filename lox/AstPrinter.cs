@@ -51,6 +51,16 @@ class AstPrinter : Expr.IExprVisitor<string>
         return Parenthesize(expr.Callee.ToString(), expr.Arguments.ToArray());
     }
 
+    public string Visit(Expr.Get expr)
+    {
+        throw new NotImplementedException();
+    }
+
+    public string Visit(Expr.Set expr)
+    {
+        throw new NotImplementedException();
+    }
+
     private string Parenthesize(String name, params Expr[] exprs)
     {
         var sb = new StringBuilder();
