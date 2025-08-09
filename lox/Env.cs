@@ -2,7 +2,7 @@ namespace CraftingInterpreters.Lox;
 
 class Env
 {
-    private readonly Env _enclosing;
+    internal readonly Env _enclosing;
     private readonly Dictionary<string, object> _values = new();
 
     internal Env()

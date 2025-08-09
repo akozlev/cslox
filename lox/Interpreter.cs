@@ -392,6 +392,12 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
 
         _environment.Define(stmt.Name.Lexeme, null);
 
+        if (stmt.Superclass is not null)
+        {
+            _environment = new Env(_environment);
+            _environment.Define("super", superclass);
+        }
+
         var methods = new Dictionary<string, Function>();
         foreach (var method in stmt.Methods)
         {
@@ -400,9 +406,29 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
         }
 
         var @class = new Class(stmt.Name.Lexeme, superclass, methods);
+
+        if (superclass is not null)
+        {
+            _environment = _environment._enclosing;
+        }
+
         _environment.Assign(stmt.Name, @class);
 
         return null;
+    }
+
+    public object Visit(Expr.Super expr)
+    {
+        int distance = _locals[expr];
+        var superclass = (Class)_environment.GetAt(distance, "super");
+        var instance = (Instance)_environment.GetAt(distance - 1, "this");
+        var method = superclass.FindMethod(expr.Method.Lexeme);
+
+        if (method is null)
+        {
+            throw new RuntimeError(expr.Method, $"Undefined property '{expr.Method.Lexeme}'.");
+        }
+        return method.Bind(instance);
     }
 
     private class Clock : ICallable

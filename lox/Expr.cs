@@ -12,6 +12,7 @@ internal abstract class Expr
         R Visit(Literal expr);
         R Visit(Logical expr);
         R Visit(Set expr);
+        R Visit(Super expr);
         R Visit(This expr);
         R Visit(Unary expr);
         R Visit(Variable expr);
@@ -151,6 +152,23 @@ internal abstract class Expr
             Object = @object;
             Name = name;
             Value = value;
+        }
+
+        internal override R Accept<R>(IExprVisitor<R> visitor)
+        {
+            return visitor.Visit(this); 
+        }
+    }
+
+    internal class Super : Expr
+    {
+        public Token Keyword { get; }
+        public Token Method { get; }
+
+        internal Super(Token keyword, Token method)
+        {
+            Keyword = keyword;
+            Method = method;
         }
 
         internal override R Accept<R>(IExprVisitor<R> visitor)

@@ -53,7 +53,8 @@ class Parser
         Token name = Consume(IDENTIFIER, "Expected class name.");
 
         Expr.Variable superclass = null;
-        if (Match(LESS)) {
+        if (Match(LESS))
+        {
             Consume(IDENTIFIER, "Expected superclass name.");
             superclass = new Expr.Variable(Previous());
         }
@@ -270,7 +271,9 @@ class Parser
             if (expr is Expr.Variable { Name: var name })
             {
                 return new Expr.Assign(name, value);
-            } else if (expr is Expr.Get get) {
+            }
+            else if (expr is Expr.Get get)
+            {
                 return new Expr.Set(get.Object, get.Name, value);
             }
 
@@ -406,7 +409,9 @@ class Parser
             if (Match(LEFT_PAREN))
             {
                 expr = FinishCall(expr);
-            } else if (Match(DOT)){
+            }
+            else if (Match(DOT))
+            {
                 var name = Consume(IDENTIFIER, "Expect property name after '.'.");
                 expr = new Expr.Get(expr, name);
             }
@@ -439,7 +444,16 @@ class Parser
             return new Expr.Literal(Previous().Literal);
         }
 
-        if (Match(THIS)) {
+        if (Match(SUPER))
+        {
+            var keyword = Previous();
+            Consume(DOT, "Expect '.' after 'super'.");
+            Token method = Consume(IDENTIFIER, "Expect superclass method name.");
+            return new Expr.Super(keyword, method);
+        }
+
+        if (Match(THIS))
+        {
             return new Expr.This(Previous());
         }
 

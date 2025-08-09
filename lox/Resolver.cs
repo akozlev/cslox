@@ -37,6 +37,7 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
     {
         None,
         Class,
+        Subclass,
     }
 
     private void Resolve(Stmt stmt)
@@ -282,13 +283,21 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
         Declare(stmt.Name);
         Define(stmt.Name);
 
-
-        if (stmt.Superclass is {} superclass) {
-            if (stmt.Name.Lexeme == superclass.Name.Lexeme) {
-                Lox.Error(stmt.Superclass.Name,"A class can't inherit from itself");
+        if (stmt.Superclass is { } superclass)
+        {
+            if (stmt.Name.Lexeme == superclass.Name.Lexeme)
+            {
+                Lox.Error(stmt.Superclass.Name, "A class can't inherit from itself");
             }
 
+            _currentClass = ClassType.Subclass;
             Resolve(superclass);
+        }
+
+        if (stmt.Superclass is not null)
+        {
+            BeginScope();
+            _scopes.Peek().Add("super", true);
         }
 
         BeginScope();
@@ -304,7 +313,27 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
 
         EndScope();
 
+        if (stmt.Superclass is not null)
+        {
+            EndScope();
+        }
+
         _currentClass = enclosingClass;
+        return default;
+    }
+
+    public Void Visit(Expr.Super expr)
+    {
+        if (_currentClass is ClassType.None)
+        {
+            Lox.Error(expr.Keyword, "Can't use 'super' outside of a class.");
+        }
+        else if (_currentClass is not ClassType.Subclass)
+        {
+            Lox.Error(expr.Keyword, "Can't use 'super' in a class with no superclass.");
+        }
+
+        ResolveLocal(expr, expr.Keyword);
         return default;
     }
 }
