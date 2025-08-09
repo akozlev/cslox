@@ -358,7 +358,7 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
 
     public object Visit(Stmt.Function stmt)
     {
-        var func = new Function(stmt, _environment);
+        var func = new Function(stmt, _environment, false);
         _environment.Define(stmt.Name.Lexeme, func);
         return null;
     }
@@ -384,7 +384,7 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
         var methods = new Dictionary<string, Function>();
         foreach (var method in stmt.Methods)
         {
-            var function = new Function(method, _environment);
+            var function = new Function(method, _environment, method.Name.Lexeme.Equals("init"));
             methods[method.Name.Lexeme] = function;
         }
 

@@ -4,9 +4,11 @@ class Function : ICallable
 {
     private readonly Stmt.Function _declaration;
     private readonly Env _closure;
+    private readonly bool _isInitializer;
 
-    public Function(Stmt.Function declaration, Env closure)
+    public Function(Stmt.Function declaration, Env closure, bool isInitializer)
     {
+        _isInitializer = isInitializer;
         _closure = closure;
         _declaration = declaration;
     }
@@ -28,9 +30,14 @@ class Function : ICallable
         }
         catch (Return returnValue)
         {
+            if (_isInitializer)
+                return _closure.GetAt(0, "this");
+
             return returnValue.Value;
         }
 
+        if (_isInitializer)
+            return _closure.GetAt(0, "this");
         return null;
     }
 
@@ -43,6 +50,6 @@ class Function : ICallable
     {
         var environment = new Env(_closure);
         environment.Define("this", instance);
-        return new Function(_declaration, environment);
+        return new Function(_declaration, environment, _isInitializer);
     }
 }

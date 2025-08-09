@@ -5,7 +5,18 @@ class Class : ICallable
     public readonly string Name;
     private readonly Dictionary<string, Function> _methods;
 
-    public int Arity => 0;
+    public int Arity
+    {
+        get
+        {
+            if (FindMethod("init") is { } initializer)
+            {
+                return initializer.Arity;
+            }
+
+            return 0;
+        }
+    }
 
     public Class(string name, Dictionary<string, Function> methods)
     {
@@ -16,6 +27,12 @@ class Class : ICallable
     public object Call(Interpreter interpreter, List<object> arguments)
     {
         var instance = new Instance(this);
+
+        if (FindMethod("init") is { } initializer)
+        {
+            initializer.Bind(instance).Call(interpreter, arguments);
+        }
+
         return instance;
     }
 

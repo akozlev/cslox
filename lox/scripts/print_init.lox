@@ -1,0 +1,15 @@
+class Foo {
+  init() {
+    print this;
+  }
+}
+
+class Bar {
+  init(arg) {
+    print arg;
+  }
+}
+
+var foo = Foo();
+
+var bar = Bar("bar");

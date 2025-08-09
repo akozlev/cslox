@@ -29,6 +29,7 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
     {
         None,
         Function,
+        Initializer,
         Method,
     }
 
@@ -155,6 +156,10 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
 
         if (stmt.Value is { } value)
         {
+            if (_currentFunction is FunctionType.Initializer)
+            {
+                Lox.Error(stmt.Keyword, "Can't return a value from an initializer.");
+            }
             Resolve(value);
         }
         return default;
@@ -232,7 +237,8 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
 
     public Void Visit(Expr.This expr)
     {
-        if (_currentClass is ClassType.None) {
+        if (_currentClass is ClassType.None)
+        {
             Lox.Error(expr.Keyword, "Can't use 'this' outside of a class.");
             return default;
         }
@@ -281,7 +287,9 @@ class Resolver : Expr.IExprVisitor<Void>, Stmt.IExprVisitor<Void>
 
         foreach (var method in stmt.Methods)
         {
-            var declaration = FunctionType.Method;
+            var declaration = method.Name.Lexeme.Equals("init")
+                ? FunctionType.Initializer
+                : FunctionType.Method;
             ResolveFunction(method, declaration);
         }
 
