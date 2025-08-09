@@ -379,6 +379,17 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
 
     public object Visit(Stmt.Class stmt)
     {
+        Class superclass = null;
+        if (stmt.Superclass is not null)
+        {
+            if (Evaluate(stmt.Superclass) is not Class evaluatedClass)
+            {
+                throw new RuntimeError(stmt.Superclass.Name, "Superclass must be a class.");
+            }
+
+            superclass = evaluatedClass;
+        }
+
         _environment.Define(stmt.Name.Lexeme, null);
 
         var methods = new Dictionary<string, Function>();
@@ -388,7 +399,7 @@ class Interpreter : Expr.IExprVisitor<object>, Stmt.IExprVisitor<object>
             methods[method.Name.Lexeme] = function;
         }
 
-        var @class = new Class(stmt.Name.Lexeme, methods);
+        var @class = new Class(stmt.Name.Lexeme, superclass, methods);
         _environment.Assign(stmt.Name, @class);
 
         return null;

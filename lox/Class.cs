@@ -3,6 +3,7 @@ namespace CraftingInterpreters.Lox;
 class Class : ICallable
 {
     public readonly string Name;
+    public readonly Class Superclass;
     private readonly Dictionary<string, Function> _methods;
 
     public int Arity
@@ -18,8 +19,9 @@ class Class : ICallable
         }
     }
 
-    public Class(string name, Dictionary<string, Function> methods)
+    public Class(string name, Class superclass, Dictionary<string, Function> methods)
     {
+        Superclass = superclass;
         Name = name;
         _methods = methods;
     }
@@ -46,6 +48,11 @@ class Class : ICallable
         if (_methods.TryGetValue(name, out var method))
         {
             return method;
+        }
+
+        if (Superclass is not null)
+        {
+            return Superclass.FindMethod(name);
         }
 
         return null;
